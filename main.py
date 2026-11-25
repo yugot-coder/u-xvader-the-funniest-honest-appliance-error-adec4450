@@ -8,6 +8,18 @@ machine's own flat, put-upon voice. The fault is real — coins blocking the
 drain pump are one of the most common causes of a washer drain error — and
 the laugh comes out of the truth of it: the machine keeps the coin.
 
+Why this line works (the joke, in one paragraph): the best honest errors
+sound like a person who has had enough, not like a manual. "Error E12" is
+the dry, official frame; "Drain pump blocked by a coin" is the true fault;
+"I am keeping it" is the machine quietly admitting it has taken a finder's
+fee; "Call an engineer" is the shrug that closes it. Four beats, 75
+characters, one line, no setup the reader has to decode — the appliance is
+the straight man and the punchline at once.
+
+Structure: validate_entry() enforces the competition gate (1-200 chars, one
+line, non-blank, UTF-8); write_entry() writes the validated text and
+verifies it by reading it back; main() ties the two together.
+
 Standard library only. Deterministic: the same bytes on every run.
 """
 
@@ -40,20 +52,28 @@ def validate_entry(text):
     return True
 
 
+def write_entry(text, path=OUTPUT_PATH):
+    """Write the validated entry text to path, then verify it by reading it
+    back: the bytes on disk must be exactly text encoded as UTF-8.
+
+    Returns the sha256 hex digest of the bytes written, so callers can
+    confirm the output is byte-identical across runs.
+    """
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8", newline="") as f:
+        f.write(text)
+    with open(path, "rb") as f:
+        raw = f.read()
+    if raw != text.encode("utf-8"):
+        raise ValueError("read-back mismatch: %s differs from entry text" % path)
+    return hashlib.sha256(raw).hexdigest()
+
+
 def main():
     validate_entry(ENTRY_TEXT)
-    os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
-    with open(OUTPUT_PATH, "w", encoding="utf-8", newline="") as f:
-        f.write(ENTRY_TEXT)
-    # Read-back verification: the file on disk must be byte-identical to the
-    # entry text we validated.
-    with open(OUTPUT_PATH, "rb") as f:
-        raw = f.read()
-    if raw != ENTRY_TEXT.encode("utf-8"):
-        raise ValueError("read-back mismatch: /output/entry.txt differs from ENTRY_TEXT")
-    digest = hashlib.sha256(raw).hexdigest()
+    digest = write_entry(ENTRY_TEXT)
     print("wrote %s (%d characters, %d bytes, sha256 %s)"
-          % (OUTPUT_PATH, len(ENTRY_TEXT), len(raw), digest))
+          % (OUTPUT_PATH, len(ENTRY_TEXT), len(ENTRY_TEXT.encode("utf-8")), digest))
     return 0
 
 
