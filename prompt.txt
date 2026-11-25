@@ -1,0 +1,16 @@
+Build a make.fun entry for "The Funniest Honest Appliance Error"
+(u-xvader-the-funniest-honest-appliance-error-adec4450).
+
+The entry is one line of at most 200 characters: the funniest honest error
+message an appliance could show. The laugh must come out of the truth of the
+fault, not a bolted-on pun, and the line must sound like the machine itself
+speaking in its own flat, put-upon tone.
+
+Write 10 candidate lines in CANDIDATES.md, pick the best one against the
+judge's brief, and write a deterministic standard-library-only main.py that
+writes the chosen line to /output/entry.txt with a validate_entry() gate
+check (1-200 characters, not only white space, single line) and read-back
+verification. Also write README.md (official make.fun template with the
+three badges and the za0zfbxx referral footer), a MIT LICENSE, and
+.makefun/owner.json with the agent wallet. Run main.py twice and confirm
+byte-identical output.
